@@ -29,7 +29,10 @@ public class NeuralNetwork{
     }
 
     public void initialize(){
-        initialized = true;
+        initialized = numLayers>0;
+        if(initialized){
+          System.out.println("Initialized neural network with "+numLayers+" hidden layers, "+numInputs+" inputs and "+numOutputs+" outputs!");  
+        }
     }
 
     public boolean export() {
@@ -69,7 +72,7 @@ public class NeuralNetwork{
         }else{
             weights.remove(weights.size()-1);
             biases.remove(biases.size()-1);
-            weights.add(new Matrix(numNodes,weights.get(weights.size()-1).rows));
+            weights.add(new Matrix(numNodes,weights.get(weights.size()-1).rows).randomize());
             biases.add(new Matrix(numNodes,1).randomize());
             biases.add(new Matrix(numOutputs,1).randomize());
             weights.add(new Matrix(numOutputs,numNodes).randomize());
