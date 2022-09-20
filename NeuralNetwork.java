@@ -1,12 +1,24 @@
 import java.util.ArrayList;
+import java.nio.file.*;
 
 public class NeuralNetwork{
 
-    public ArrayList<Matrix> weights,biases;
+    ArrayList<Matrix> weights,biases;
     boolean initialized;
     int numInputs,numOutputs,numLayers=0;
     float learningRate = 0.1f;
 
+    public NeuralNetwork(ArrayList<Matrix>w,ArrayList<Matrix>b){
+        if(w.size() != b.size()){
+            System.out.println("invalid model");
+            return;
+        }
+        weights = new ArrayList<>(w);
+        biases = new ArrayList<>(b);
+        numInputs = w.get(0).cols;
+        numOutputs = w.get(w.size()-1).rows;
+        numLayers = w.size()-1;
+    }
 
     public NeuralNetwork(int numI,int numO){
         numInputs = numI;
@@ -18,6 +30,33 @@ public class NeuralNetwork{
 
     public void initialize(){
         initialized = true;
+    }
+
+    public boolean export() {
+        if(!initialized)return false;
+        try{
+        Path directory = Paths.get("model");
+        if(!Files.exists(directory)){
+            Files.createDirectory(directory);
+        }
+
+        String wFileExt = "weight";
+        String bFileExt = "bias";
+
+        for(int i=0;i<=numLayers;i++){
+            String wStrFormat = weights.get(i).toString();
+            Path wFile = Paths.get("model/layer"+String.valueOf(i)+"."+wFileExt);
+            Files.write(wFile,wStrFormat.getBytes());
+            String bStrFormat = biases.get(i).toString();
+            Path bFile = Paths.get("model/layer"+String.valueOf(i)+"."+bFileExt);
+            Files.write(bFile,bStrFormat.getBytes());
+        }
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+
     }
 
     public void addLayer(int numNodes){
@@ -42,14 +81,6 @@ public class NeuralNetwork{
         if(!initialized)return null;
         Matrix result = input;
         for(int i=0;i<weights.size();i++){
-            /*try{
-            result = Matrix.mult(weights.get(i),result).addSelf(biases.get(i)).sigmoid();
-            }catch(Exception e){
-                System.out.println(i);
-                weights.get(i).print();
-                result.print();
-                System.exit(0);
-            }*/
             result = Matrix.mult(weights.get(i),result).addSelf(biases.get(i)).sigmoid();
         }
         return result;
@@ -82,5 +113,25 @@ public class NeuralNetwork{
         }
 
     }
+
+
+    public static NeuralNetwork createModel(String modelPath) {
+        ArrayList<Matrix> weights = new ArrayList<>();
+        ArrayList<Matrix> biases = new ArrayList<>();
+        try{
+            for(Object o:Files.list(Paths.get(modelPath)).toArray()){
+                if(((Path)o).getFileName().toString().endsWith("weight")){
+                    weights.add(new Matrix(Files.readAllLines((Path)o)));
+                }else if(((Path)o).getFileName().toString().endsWith("bias")){
+                    biases.add(new Matrix(Files.readAllLines((Path)o)));
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
+        return new NeuralNetwork(weights,biases);
+    }
+
 
 }

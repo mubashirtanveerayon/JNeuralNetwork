@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Matrix {
   public int rows, cols;
 
@@ -7,6 +9,33 @@ public class Matrix {
     rows = r;
     cols = c;
     array = new float[rows][cols];
+  }
+
+  public Matrix(List<String> mat){
+    String[] dimensions = mat.get(0).split(",");
+    String[] values = mat.get(1).split(",");
+    rows = Integer.parseInt(dimensions[0]);
+    cols = Integer.parseInt(dimensions[1]);
+
+    array = new float[rows][cols];
+
+    for(int i=0;i<rows;i++){
+        for(int j=0;j<cols;j++){
+            array[i][j] = Float.parseFloat(values[j+i*cols]);
+        }
+    }
+  }
+
+  public String toString(){
+    StringBuffer sb = new StringBuffer("");
+    sb.append(String.valueOf(rows)).append(",").append(String.valueOf(cols)).append("\n");
+    for (int i=0; i<rows; i++) {
+        for (int j=0; j<cols; j++) {
+            sb.append(String.valueOf(array[i][j])).append(",");
+        }
+    }
+    sb.delete(sb.length()-1,sb.length());
+    return sb.toString();
   }
   
   public Matrix up1RowSelf(){
